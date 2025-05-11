@@ -12,6 +12,7 @@ import WebKit
 
 struct ContentView: View {
     @Environment(AppModel.self) var appModel
+    @Environment(\.openWindow) var openWindow  // Add this
     @State private var currentURL: URL
     @State private var searchText: String = ""
     @State private var webView: WKWebView? = nil  // To control the WebView
@@ -35,7 +36,8 @@ struct ContentView: View {
                 Button {
                     if let videoURL = appModel.getVideoPlayerURL(from: currentURL) {
                         appModel.videoPlayerURL = videoURL
-                        appModel.showVideoPlayerWindow = true
+                        appModel.showVideoPlayerWindow = true  // Keep for state consistency
+                        openWindow(id: "videoPlayerWindow")  // Open the new window
                     } else {
                         // Optionally, provide feedback to the user that the current URL is not a valid video URL
                         print("Not a Bilibili video page or unable to parse URL.")

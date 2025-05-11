@@ -13,6 +13,7 @@ struct WebView: UIViewRepresentable {
 
     let wkWebView = WKWebView(frame: .zero, configuration: config)
     wkWebView.navigationDelegate = context.coordinator
+    wkWebView.uiDelegate = context.coordinator  // Set the UIDelegate
 
     // Update the binding to provide the WKWebView instance to the parent view
     // Doing this asynchronously ensures the view is fully set up.
@@ -35,7 +36,7 @@ struct WebView: UIViewRepresentable {
     Coordinator(self)
   }
 
-  class Coordinator: NSObject, WKNavigationDelegate {
+  class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {  // Add WKUIDelegate
     var parent: WebView
 
     init(_ parent: WebView) {
@@ -61,6 +62,17 @@ struct WebView: UIViewRepresentable {
       withError error: Error
     ) {
       print("WebView provisional navigation failed: \(error.localizedDescription)")
+    }
+
+    // Handle requests to open new windows
+    func webView(
+      _ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
+      for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+      if navigationAction.targetFrame == nil {
+        webView.load(navigationAction.request)
+      }
+      return nil
     }
   }
 }

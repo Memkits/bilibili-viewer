@@ -28,13 +28,14 @@ struct bilibili_viewerApp: App {
             Group {  // Wrap conditional content in a Group to apply environment modifier
                 if let playerURL = appModel.videoPlayerURL {
                     WebView(url: .constant(playerURL), currentWebViewInstance: $playerWebView)
+                        .edgesIgnoringSafeArea(.all)  // Make the WebView full-screen
                 } else {
                     Text("No video to play")  // Placeholder
                 }
             }
             .environment(appModel)  // Added environment modifier
         }
-        .windowStyle(.volumetric)  // Example of how you might style a media player window
+        .windowStyle(.plain)  // Use plain window style for full-screen
         // To control presentation, you would typically use .openWindow or .dismissWindow actions
         // triggered by changes in appModel.showVideoPlayerWindow, rather than binding it directly here.
         // For example, in ContentView or another relevant view:

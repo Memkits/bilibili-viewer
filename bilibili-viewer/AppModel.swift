@@ -40,7 +40,7 @@ class AppModel: ObservableObject {  // Explicitly conform to ObservableObject
         let pathComponents = bilibiliVideoURL.pathComponents
         if pathComponents.count > 2 {
             let bvid = pathComponents[2]
-            return URL(string: "\(bilibiliPlayerURLBase)&bvid=\(bvid)&page=1")
+            return URL(string: "\(bilibiliPlayerURLBase)&bvid=\(bvid)&page=1&high_quality=1")
         }
         return nil
     }
