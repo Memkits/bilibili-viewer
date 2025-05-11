@@ -6,6 +6,7 @@ struct WebView: UIViewRepresentable {
   @Binding var currentWebViewInstance: WKWebView?
 
   func makeUIView(context: Context) -> WKWebView {
+    print("WebView: makeUIView called. Creating new WKWebView for URL: \(url.absoluteString)")  // DEBUG
     let config = WKWebViewConfiguration()
     config.allowsInlineMediaPlayback = true
     // Attempt to allow autoplay, though browser policies might still intervene
@@ -24,11 +25,19 @@ struct WebView: UIViewRepresentable {
   }
 
   func updateUIView(_ uiView: WKWebView, context: Context) {
+    print(
+      "WebView: updateUIView called. Target URL: \(url.absoluteString). Current uiView.url: \(uiView.url?.absoluteString ?? "nil")"
+    )  // DEBUG
     // Only load if the URL is different from the current one to avoid reload loops
     // and ensure that programmatic URL changes from ContentView are reflected.
     if uiView.url?.absoluteString != url.absoluteString {
+      print(
+        "WebView: Reloading - target URL (\(url.absoluteString)) is different from uiView.url (\(uiView.url?.absoluteString ?? "nil"))."
+      )  // DEBUG
       let request = URLRequest(url: url)
       uiView.load(request)
+    } else {
+      print("WebView: Not reloading - URL strings match.")  // DEBUG
     }
   }
 

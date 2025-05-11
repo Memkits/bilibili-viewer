@@ -20,28 +20,9 @@ class AppModel: ObservableObject {  // Explicitly conform to ObservableObject
     }
     var immersiveSpaceState = ImmersiveSpaceState.closed
 
-    var videoPlayerURL: URL? = nil
-    var showVideoPlayerWindow: Bool = false
-
     // Constants for Bilibili URLs
     let bilibiliHomeURL = URL(string: "https://www.bilibili.com")!
     let bilibiliSearchURLBase = "https://search.bilibili.com/all?keyword="
-    let bilibiliVideoHost = "www.bilibili.com"
-    let bilibiliVideoPathPrefix = "/video/BV"
-    let bilibiliPlayerURLBase = "https://player.bilibili.com/player.html?isOutside=true&autoplay=1"  // Added autoplay=1
-
-    func getVideoPlayerURL(from bilibiliVideoURL: URL) -> URL? {
-        guard bilibiliVideoURL.host == bilibiliVideoHost,
-            bilibiliVideoURL.path.starts(with: bilibiliVideoPathPrefix)
-        else {
-            return nil
-        }
-        // Extract bvid, assuming format /video/BVID/...
-        let pathComponents = bilibiliVideoURL.pathComponents
-        if pathComponents.count > 2 {
-            let bvid = pathComponents[2]
-            return URL(string: "\(bilibiliPlayerURLBase)&bvid=\(bvid)&page=1&high_quality=1")
-        }
-        return nil
-    }
+    let bilibiliVideoHost = "www.bilibili.com"  // Keep for checking if it's a video page
+    let bilibiliVideoPathPrefix = "/video/BV"  // Keep for checking if it's a video page
 }

@@ -12,7 +12,6 @@ import WebKit
 
 struct ContentView: View {
     @Environment(AppModel.self) var appModel
-    @Environment(\.openWindow) var openWindow  // Add this
     @State private var currentURL: URL
     @State private var searchText: String = ""
     @State private var webView: WKWebView? = nil  // To control the WebView
@@ -21,10 +20,20 @@ struct ContentView: View {
         _currentURL = State(initialValue: AppModel().bilibiliHomeURL)
     }
 
+    private func performSearch() {
+        if let encodedSearchText = searchText.addingPercentEncoding(
+            withAllowedCharacters: .urlQueryAllowed),
+            let searchURL = URL(
+                string:
+                    "\(appModel.bilibiliSearchURLBase)\(encodedSearchText)&from_source=webtop_search&spm_id_from=333.788&search_source=3"
+            )
+        {
+            currentURL = searchURL
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            WebView(url: $currentURL, currentWebViewInstance: $webView)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             HStack {
                 Button {
@@ -34,35 +43,29 @@ struct ContentView: View {
                 }
 
                 Button {
-                    if let videoURL = appModel.getVideoPlayerURL(from: currentURL) {
-                        appModel.videoPlayerURL = videoURL
-                        appModel.showVideoPlayerWindow = true  // Keep for state consistency
-                        openWindow(id: "videoPlayerWindow")  // Open the new window
+                    // Execute JavaScript to click the fullscreen button
+                    if isBilibiliVideoPage(url: currentURL) {
+                        triggerBilibiliFullscreen()
                     } else {
-                        // Optionally, provide feedback to the user that the current URL is not a valid video URL
-                        print("Not a Bilibili video page or unable to parse URL.")
+                        // Optionally, provide feedback that it's not a video page
+                        print("Not a Bilibili video page or unable to trigger fullscreen.")
                     }
                 } label: {
-                    Label("Open Video Fullscreen", systemImage: "arrow.up.right.video.fill")
+                    Label("Toggle Fullscreen", systemImage: "arrow.up.right.video.fill")  // Icon can remain similar
                 }
-                .disabled(appModel.getVideoPlayerURL(from: currentURL) == nil)  // Disable if not a video page
+                .disabled(!isBilibiliVideoPage(url: currentURL))  // Enable only on video pages
 
                 Spacer()
 
                 TextField("Search on Bilibili", text: $searchText)
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 300)
+                    .onSubmit {
+                        performSearch()
+                    }
 
                 Button {
-                    if let encodedSearchText = searchText.addingPercentEncoding(
-                        withAllowedCharacters: .urlQueryAllowed),
-                        let searchURL = URL(
-                            string:
-                                "\(appModel.bilibiliSearchURLBase)\(encodedSearchText)&from_source=webtop_search&spm_id_from=333.788&search_source=3"
-                        )
-                    {
-                        currentURL = searchURL
-                    }
+                    performSearch()
                 } label: {
                     Label("Search", systemImage: "magnifyingglass")
                 }
@@ -71,12 +74,37 @@ struct ContentView: View {
             }
             .padding()
             .background(.thinMaterial)
+
+            WebView(url: $currentURL, currentWebViewInstance: $webView)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
         }
         .onChange(of: currentURL) { _, newURL in
             // This ensures that if the user navigates within the WebView,
-            // the 'Open Video Fullscreen' button's state is updated.
+            // the 'Toggle Fullscreen' button's state is updated.
             print("Current URL changed to: \(newURL)")
         }
+    }
+
+    // Helper function to check if the current URL is a Bilibili video page
+    private func isBilibiliVideoPage(url: URL) -> Bool {
+        guard let host = url.host else { return false }
+        return host.contains(appModel.bilibiliVideoHost)
+            && url.path.starts(with: appModel.bilibiliVideoPathPrefix)
+    }
+
+    // Function to execute JavaScript for fullscreen
+    private func triggerBilibiliFullscreen() {
+        let script =
+            "el = document.querySelector('.bpx-player-ctrl-web'); console.log('Inspect', el);  el.click();"
+        webView?.evaluateJavaScript(script) { result, error in
+            if let error = error {
+                print("JavaScript execution failed: \(error)")
+            } else {
+                print("JavaScript for fullscreen executed. Result: \(String(describing: result))")
+            }
+        }
+
     }
 }
 
