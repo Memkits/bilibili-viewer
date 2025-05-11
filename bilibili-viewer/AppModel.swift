@@ -21,8 +21,13 @@ class AppModel: ObservableObject {  // Explicitly conform to ObservableObject
     var immersiveSpaceState = ImmersiveSpaceState.closed
 
     // Constants for Bilibili URLs
-    let bilibiliHomeURL = URL(string: "https://www.bilibili.com")!
     let bilibiliSearchURLBase = "https://search.bilibili.com/all?keyword="
     let bilibiliVideoHost = "www.bilibili.com"  // Keep for checking if it's a video page
     let bilibiliVideoPathPrefix = "/video/BV"  // Keep for checking if it's a video page
+
+    var bilibiliSearch4kStreetViewURL: String {
+        return
+            "https://search.bilibili.com/all?keyword=4k%20街景&from_source=webtop_search&spm_id_from=333.788&search_source=3"
+    }
+
 }
