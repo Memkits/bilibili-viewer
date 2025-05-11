@@ -65,18 +65,39 @@ struct ContentView: View {
             .padding()
             .background(.thinMaterial)
 
-            WebView(url: $currentURL, currentWebViewInstance: $webView)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .onChange(of: webView?.canGoBack) { _, _ in
-                    // This is a bit of a workaround to force the view to re-evaluate `canGoBack`
-                    // A more robust solution might involve a custom Coordinator for the WebView
-                    // that publishes canGoBack changes.
-                    // For now, triggering a state change on currentURL (even to itself)
-                    // or having a dedicated @State variable that gets toggled might work.
-                    // Let's try a simpler approach first by just having the disabled state check it.
-                    // The .disabled modifier should re-evaluate when the view updates.
-                    // We might need to observe webView.canGoBack more directly if this isn't enough.
+            WebView(url: $currentURL, currentWebViewInstance: $webView) {
+                finishedURL in
+                // Check if it's a video page and trigger fullscreen
+                if isBilibiliVideoPage(url: finishedURL) {
+                    // Delay slightly to ensure the page elements are available
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {  // 1 second delay
+                        print("Attempting to trigger fullscreen for video page: \(finishedURL)")
+                        let ret = triggerBilibiliFullscreen()
+
+                        if !ret {
+                            // another 2 seconds delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                let ret = triggerBilibiliFullscreen()
+
+                                if !ret {
+                                    print("Failed to trigger fullscreen again.")
+                                }
+                            }
+                        }
+                    }
                 }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onChange(of: webView?.canGoBack) { _, _ in
+                // This is a bit of a workaround to force the view to re-evaluate `canGoBack`
+                // A more robust solution might involve a custom Coordinator for the WebView
+                // that publishes canGoBack changes.
+                // For now, triggering a state change on currentURL (even to itself)
+                // or having a dedicated @State variable that gets toggled might work.
+                // Let's try a simpler approach first by just having the disabled state check it.
+                // The .disabled modifier should re-evaluate when the view updates.
+                // We might need to observe webView.canGoBack more directly if this isn't enough.
+            }
 
             HStack {
                 Spacer()  // Add spacer at the beginning to push content to center
@@ -84,7 +105,7 @@ struct ContentView: View {
                 Button {
                     // Execute JavaScript to click the fullscreen button
                     if isBilibiliVideoPage(url: currentURL) {
-                        triggerBilibiliFullscreen()
+                        let _ = triggerBilibiliFullscreen()
                     } else {
                         // Optionally, provide feedback that it's not a video page
                         print("Not a Bilibili video page or unable to trigger fullscreen.")
@@ -113,6 +134,7 @@ struct ContentView: View {
             // the 'Toggle Fullscreen' button's state is updated.
             print("Current URL changed to: \(newURL)")
         }
+        .clipShape(RoundedRectangle(cornerRadius: 10))  // Add this line to round the corners of the VStack
     }
 
     // Helper function to check if the current URL is a Bilibili video page
@@ -123,17 +145,26 @@ struct ContentView: View {
     }
 
     // Function to execute JavaScript for fullscreen
-    private func triggerBilibiliFullscreen() {
-        let script =
-            "el = document.querySelector('.bpx-player-ctrl-web'); console.log('Inspect', el);  el.click();"
+    private func triggerBilibiliFullscreen() -> Bool {
+        // Create a completion group to wait for the JS evaluation
+        var success = false
+        let group = DispatchGroup()
+        group.enter()
+
+        let script = "el = document.querySelector('.bpx-player-ctrl-web'); el.click()"
         webView?.evaluateJavaScript(script) { result, error in
             if let error = error {
                 print("JavaScript execution failed: \(error)")
+                success = false
             } else {
-                print("JavaScript for fullscreen executed. Result: \(String(describing: result))")
+                success = true
             }
+            group.leave()
         }
 
+        // Wait for JavaScript to complete with timeout
+        let _ = group.wait(timeout: .now() + 0.2)
+        return success
     }
 
     private func triggerPlayPause() {
