@@ -89,14 +89,9 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onChange(of: webView?.canGoBack) { _, _ in
-                // This is a bit of a workaround to force the view to re-evaluate `canGoBack`
-                // A more robust solution might involve a custom Coordinator for the WebView
-                // that publishes canGoBack changes.
-                // For now, triggering a state change on currentURL (even to itself)
-                // or having a dedicated @State variable that gets toggled might work.
-                // Let's try a simpler approach first by just having the disabled state check it.
-                // The .disabled modifier should re-evaluate when the view updates.
-                // We might need to observe webView.canGoBack more directly if this isn't enough.
+                print("WebView canGoBack changed: \(webView?.canGoBack ?? false)")
+            }.onAppear {
+                webView?.configuration.suppressesIncrementalRendering = true  // 阻止增量渲染
             }
 
             HStack {

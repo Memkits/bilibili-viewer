@@ -33,7 +33,19 @@ struct WebView: UIViewRepresentable {
     context.coordinator.onPageFinishLoad = onPageFinishLoad  // Ensure coordinator has the latest callback
     // Only load if the URL is different from the current one to avoid reload loops
     // and ensure that programmatic URL changes from ContentView are reflected.
-    if uiView.url?.absoluteString != url.absoluteString {
+    var currentURL = uiView.url?.absoluteString ?? ""
+    currentURL = currentURL.replacingOccurrences(of: "%3A", with: ":")
+    do {
+      // dirty trick to avoid reload loop
+      let regex = try NSRegularExpression(pattern: "&vd_source=[^&]*", options: [])
+      currentURL = regex.stringByReplacingMatches(
+        in: currentURL, options: [], range: NSRange(location: 0, length: currentURL.utf16.count),
+        withTemplate: ""
+      )
+    } catch {
+      print("Error creating regex: \(error)")
+    }
+    if currentURL != url.absoluteString {
       print(
         "WebView: Reloading - target URL (\(url.absoluteString)) is different from uiView.url (\(uiView.url?.absoluteString ?? "nil"))."
       )  // DEBUG
