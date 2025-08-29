@@ -90,8 +90,6 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onChange(of: webView?.canGoBack) { _, _ in
                 print("WebView canGoBack changed: \(webView?.canGoBack ?? false)")
-            }.onAppear {
-                webView?.configuration.suppressesIncrementalRendering = true  // 阻止增量渲染
             }
 
             HStack {
