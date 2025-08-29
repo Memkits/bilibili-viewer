@@ -117,58 +117,66 @@ struct WebView: UIViewRepresentable {
 
     private func injectVisionOSOptimizedCSS(webView: WKWebView) {
       let cssCode = """
-        /* VisionOS触控优化 */
-        button, a, input {
-          min-height: 44px !important;
-          min-width: 44px !important;
-        }
-        
-        /* 优化滚动条 */
-        ::-webkit-scrollbar {
-          width: 16px !important;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-          background-color: rgba(0,0,0,0.3) !important;
-          border-radius: 8px !important;
-        }
-        
-        /* B站视频播放器进度条优化 */
-        .bpx-player-progress {
-          height: 16px !important;
-          min-height: 16px !important;
-        }
-        
-        .bpx-player-progress-schedule {
-          height: 16px !important;
-        }
-        
-        .bpx-player-progress-schedule-wrap {
-          height: 16px !important;
-        }
-        
-        /* B站播放器控制按钮优化 */
-        .bpx-player-ctrl-btn {
-          min-height: 44px !important;
-          min-width: 44px !important;
-          padding: 8px 12px !important;
-        }
-        
-        .bpx-player-ctrl-quality,
-        .bpx-player-ctrl-playbackrate,
-        .bpx-player-ctrl-subtitle {
-          min-height: 44px !important;
-          min-width: 44px !important;
-        }
-        
-        /* 播放器菜单项优化 */
-        .bpx-player-ctrl-quality-menu-item,
-        .bpx-player-ctrl-playbackrate-menu-item {
-          min-height: 44px !important;
-          padding: 8px 16px !important;
-          line-height: 28px !important;
-        }
-      """
+          /* VisionOS触控优化 */
+          button, a, input {
+            min-height: 44px !important;
+            min-width: 44px !important;
+          }
+
+          /* 优化滚动条 */
+          ::-webkit-scrollbar {
+            width: 16px !important;
+          }
+
+          ::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.3) !important;
+            border-radius: 8px !important;
+          }
+
+          /* B站视频播放器进度条优化 */
+          .bpx-player-progress {
+            height: 16px !important;
+            min-height: 16px !important;
+          }
+
+          .bpx-player-progress-schedule {
+            height: 16px !important;
+          }
+
+          .bpx-player-progress-schedule-wrap {
+            height: 16px !important;
+          }
+
+          /* B站播放器控制按钮优化 */
+          .bpx-player-ctrl-btn {
+            min-height: 44px !important;
+            min-width: 44px !important;
+            padding: 8px 12px !important;
+          }
+
+          .bpx-player-ctrl-quality,
+          .bpx-player-ctrl-playbackrate,
+          .bpx-player-ctrl-subtitle {
+            min-height: 44px !important;
+            min-width: 44px !important;
+          }
+
+          /* 播放器菜单项优化 */
+          .bpx-player-ctrl-quality-menu-item,
+          .bpx-player-ctrl-playbackrate-menu-item {
+            min-height: 44px !important;
+            padding: 8px 16px !important;
+            line-height: 28px !important;
+          }
+
+          /* nav buttons */
+          .v-popover-wrap {
+            min-width: 56px !important;
+          }
+          .download-client-trigger {
+            display: none !important;
+          }
+        """
 
       let jsCode =
         "var style = document.createElement('style'); style.innerHTML = `\(cssCode)`; document.head.appendChild(style);"
